@@ -1,0 +1,41 @@
+zabbix_export:
+  version: '6.0'
+  templates:
+    - 
+      uuid: d1eb9ba122e74944958b5dc7f1396452
+      template: SSL Certificate Expiry
+      name: SSL Certificate Expiry
+      groups:
+        - name: Templates
+      items:
+        - 
+          uuid: e934e3ff86904835a8f8a9abc3fb4434
+          name: SSL cert days until expiry
+          type: EXTERNAL
+          key: ssl_expiry_check.sh[{HOST.HOST}]
+          delay: 6h
+          history: 7d
+          trends: 30d
+          value_type: UNSIGNED
+          units: days
+          triggers:
+            - 
+              uuid: 2380f2a7563c43809fc71e313d95cdb6
+              expression: 'last(/SSL Certificate Expiry/ssl_expiry_check.sh[{HOST.HOST}])<7 and last(/SSL Certificate Expiry/ssl_expiry_check.sh[{HOST.HOST}])>3'
+              name: SSL Certificate expires in less than 7 days on {HOST.HOST}
+              priority: AVERAGE
+            - 
+              uuid: 4269ad2fbd6b441e9cf4ade3483c0d13
+              expression: 'last(/SSL Certificate Expiry/ssl_expiry_check.sh[{HOST.HOST}])<=3 and last(/SSL Certificate Expiry/ssl_expiry_check.sh[{HOST.HOST}])>1'
+              name: SSL Certificate expires in less than 3 days on {HOST.HOST}
+              priority: HIGH
+            - 
+              uuid: bc17e6f52008497ab9ef60ff03af8119
+              expression: 'last(/SSL Certificate Expiry/ssl_expiry_check.sh[{HOST.HOST}])<=1'
+              name: SSL Certificate expires in less than 1 day on {HOST.HOST}
+              priority: DISASTER
+            - 
+              uuid: 832a37b6fd4a4f4ebff8735ba33c96ef
+              expression: 'nodata(ssl_expiry_check.sh[{HOST.HOST}],2d)=1'
+              name: SSL Certificate check failed on {HOST.HOST}
+              priority: AVERAGE
